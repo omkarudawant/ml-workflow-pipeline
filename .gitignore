@@ -156,3 +156,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Additional files
+*.json
+*.txt
+

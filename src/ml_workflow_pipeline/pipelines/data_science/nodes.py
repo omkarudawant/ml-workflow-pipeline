@@ -4,7 +4,7 @@ just for illustrating basic Kedro features.
 Delete this when you start working on your own Kedro project.
 """
 # pylint: disable=invalid-name
-
+from google.cloud import storage
 import logging
 from typing import Any, Dict
 
@@ -61,6 +61,16 @@ def predict(model: np.ndarray, test_x: pd.DataFrame) -> np.ndarray:
     # Return the index of the class with max probability for all samples
     return np.argmax(result, axis=1)
 
+def store_file_to_gcs(key_path, bucket_name, local_file_name):
+    # Setting credentials using the downloaded JSON file
+    client = storage.Client.from_service_account_json(json_credentials_path=key_path)
+    # Creating bucket object
+    bucket = client.get_bucket(bucket_name)
+    # Name of the object to be stored in the bucket
+    object_name_in_gcs_bucket = bucket.blob(local_file_name)
+    # Name of the object in local file system
+    object_name_in_gcs_bucket.upload_from_filename(local_file_name)
+    print(f'File transfered to {bucket_name+ "/" +local_file_name}')
 
 def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     """Node for reporting the accuracy of the predictions performed by the
@@ -70,6 +80,16 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     target = np.argmax(test_y.to_numpy(), axis=1)
     # Calculate accuracy of predictions
     accuracy = np.sum(predictions == target) / target.shape[0]
+
+    with open("accuracy.txt", "w") as file:
+        file.write(f"Irisi model accuracy is {str(accuracy)}")
+    
+    store_file_to_gcs(
+        key_path='src\ml_workflow_pipeline\pipelines\data_science\copper-depot-342510-25d0adf742aa.json',
+        bucket_name='tzar_bucket',
+        local_file_name='accuracy.txt'
+    )
+
     # Log the accuracy of the model
     log = logging.getLogger(__name__)
     log.info("Model accuracy on test set: %0.2f%%", accuracy * 100)
