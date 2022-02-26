@@ -85,7 +85,7 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
         file.write(f"Irisi model accuracy is {str(accuracy)}")
     
     store_file_to_gcs(
-        key_path='src\ml_workflow_pipeline\pipelines\data_science\copper-depot-342510-25d0adf742aa.json',
+        key_path='sa-key.json',
         bucket_name='tzar_bucket',
         local_file_name='accuracy.txt'
     )
