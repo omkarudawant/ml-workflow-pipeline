@@ -3,6 +3,7 @@ import subprocess
 from subprocess import Popen, PIPE
 from subprocess import check_output
 from flask import Flask
+import os
 
 app = Flask(__name__)
 
@@ -16,13 +17,14 @@ def get_shell_script_output_using_communicate():
 
 
 def get_shell_script_output_using_check_output():
-    stdout = check_output(['./run_kedro.sh']).decode('utf-8')
+    stdout = check_output(['kedro run']).decode('utf-8')
     return stdout
 
 
 @app.route("/")
 def hello_world():
-    return '<pre>' + get_shell_script_output_using_check_output() + '</pre>'
+    os.system('sh run_kedro.sh')
+    return 'kedro is running...'
 
 
 if __name__ == "__main__":
