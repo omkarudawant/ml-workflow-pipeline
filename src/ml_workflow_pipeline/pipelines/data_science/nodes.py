@@ -89,7 +89,7 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     store_file_to_gcs(
         key_path='sa-key.json',
         bucket_name='tzar_bkt',
-        local_file_name='accuracy.txt'
+        local_file_name=f'accuracy{curr_date_time_stamp}.txt'
     )
 
     # Log the accuracy of the model
