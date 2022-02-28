@@ -1,2 +1,11 @@
 Flask==2.0.2
 gunicorn==20.1.0
+black==21.5b1
+flake8>=3.7.9, <4.0
+kedro==0.17.7
+pytest~=6.2
+
+setuptools~=58.0.4
+numpy~=1.19.5
+pandas~=1.1.5
+google~=3.0.0
