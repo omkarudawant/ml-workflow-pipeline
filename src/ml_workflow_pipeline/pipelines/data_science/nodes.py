@@ -114,15 +114,15 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
         file.write(f"Iris model accuracy is {str(accuracy)}")
 
     print('-' * 100)
-    print(f'{os.system("ls -l")}')
+    print(f'{os.system("ls -l src/ml_workflow_pipeline/pipelines/data_science/")}')
     key_data = access_secret_version(
         project_id='tzar-project',
         secret_id='sa-tzar-key-cloud-build',
         version_id=1
     )
-    print(f'{os.system("ls -l")}')
+    print(f'{os.system("ls -l src/ml_workflow_pipeline/pipelines/data_science/")}')
     print('-' * 100)
-    
+
     with open('sa-key.json', 'w') as file:
         file.write(key_data('private_key'))
 
