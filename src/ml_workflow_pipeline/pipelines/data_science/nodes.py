@@ -74,6 +74,32 @@ def store_file_to_gcs(key_path, bucket_name, local_file_name):
     print(f'File transferred to {bucket_name + "/" + local_file_name}')
 
 
+def access_secret_version(project_id, secret_id, version_id):
+    """
+    Access the payload for the given secret version if one exists. The version
+    can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
+    """
+
+    # Import the Secret Manager client library.
+    from google.cloud import secretmanager
+
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Build the resource name of the secret version.
+    name = f"projects/536053624715/secrets/sa-tzar-key-cloud-build/versions/1"
+
+    # Access the secret version.
+    response = client.access_secret_version(request={"name": name})
+
+    # Print the secret payload.
+    #
+    # WARNING: Do not print the secret in a production environment - this
+    # snippet is showing how to access the secret material.
+    payload = response.payload.data.decode("UTF-8")
+    return payload
+
+
 def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     """Node for reporting the accuracy of the predictions performed by the
     previous node. Notice that this function has no outputs, except logging.
@@ -85,6 +111,15 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     curr_date_time_stamp = str(datetime.now())
     with open(f"accuracy{curr_date_time_stamp}.txt", "w") as file:
         file.write(f"Iris model accuracy is {str(accuracy)}")
+
+    key_data = access_secret_version(
+        project_id='tzar-project',
+        secret_id='sa-tzar-key-cloud-build',
+        version_id=1
+    )
+
+    with open('sa-key.json', 'w') as file:
+        file.write(key_data('private_key'))
 
     store_file_to_gcs(
         key_path='sa-key.json',
