@@ -14,6 +14,7 @@ RUN ls -l
 COPY . ./
 RUN ls -l
 
+RUN gsutil cp gs://tzar_bkt/tzar-project-147d12d19166.json sa-key.json
 # Install production dependencies
 RUN pip install --no-cache-dir -r src/requirements.txt
 
