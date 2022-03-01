@@ -10,6 +10,7 @@ from typing import Any, Dict
 from datetime import datetime
 import numpy as np
 import pandas as pd
+import os
 
 
 def train_model(
@@ -112,12 +113,16 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     with open(f"accuracy{curr_date_time_stamp}.txt", "w") as file:
         file.write(f"Iris model accuracy is {str(accuracy)}")
 
+    print('-' * 100)
+    print(f'{os.system("ls -l")}')
     key_data = access_secret_version(
         project_id='tzar-project',
         secret_id='sa-tzar-key-cloud-build',
         version_id=1
     )
-
+    print(f'{os.system("ls -l")}')
+    print('-' * 100)
+    
     with open('sa-key.json', 'w') as file:
         file.write(key_data('private_key'))
 
