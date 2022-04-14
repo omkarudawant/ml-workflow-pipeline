@@ -1,0 +1,30 @@
+# This workflow demonstrates how to use the Cloud Build connector.
+# The workflow creates a simple build and the image is stored to an Artifact Registery repo. 
+# The workflow assumes a properly defined source tgz file already
+# exists in a Cloud Storage bucket: gs://your-project-id_cloudbuild/source/placeholder_src.tgz 
+# and a repository "your-project-id-docker-repo" already
+# exists in Artifact Registry where the image will be stored.
+# The new table and dataset are both deleted in the following steps.
+# Expected successful output: "SUCCESS"
+
+- init:
+    assign:
+      - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+      - location_id: "global"
+      - image_path: ${"gcr.io/${PROJECT_ID}/my-docker-repo/kedro-test"}
+- create_build:
+    call: googleapis.cloudbuild.v1.projects.builds.create
+    args:
+      projectId: ${project_id}
+      parent: ${"projects/" + project_id + "/locations/" + location_id}
+      body:
+        source:
+          storageSource:
+            bucket: ${project_id + "_cloudbuild"}
+            object: "source/1646310736.945536-98d2514068264791b32954830013ea1e.tgz"
+        steps:
+          - name: 'gcr.io/cloud-builders/docker'
+            args: [ 'build', '-t', 'gcr.io/${PROJECT_ID}/my-docker-repo/kedro-test', '.' ]
+        images: [ ${ image_path } ]
+- the_end:
+    return: "SUCCESS"

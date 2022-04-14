@@ -45,3 +45,10 @@
 example_iris_data:
   type: pandas.CSVDataSet
   filepath: data/01_raw/iris.csv
+
+#accuracy_file:
+#  type: text.TextDataSet
+#  filepath: gcs://tzar_bkt/accuracy.txt
+#  fs_args:
+#    project: tzar-project
+#  credentials: my_gcp_credentials

@@ -10,8 +10,8 @@ from typing import Any, Dict
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import os
-
+from kedro.extras.datasets.text import TextDataSet
+from kedro.io import DataCatalog
 
 def train_model(
         train_x: pd.DataFrame, train_y: pd.DataFrame, parameters: Dict[str, Any]
@@ -63,42 +63,9 @@ def predict(model: np.ndarray, test_x: pd.DataFrame) -> np.ndarray:
     return np.argmax(result, axis=1)
 
 
-def store_file_to_gcs(key_path, bucket_name, local_file_name):
-    # Setting credentials using the downloaded JSON file
-    client = storage.Client.from_service_account_json(json_credentials_path=key_path)
-    # Creating bucket object
-    bucket = client.get_bucket(bucket_name)
-    # Name of the object to be stored in the bucket
-    object_name_in_gcs_bucket = bucket.blob(local_file_name)
-    # Name of the object in local file system
-    object_name_in_gcs_bucket.upload_from_filename(local_file_name)
-    print(f'File transferred to {bucket_name + "/" + local_file_name}')
-
-
-def access_secret_version(project_id, secret_id, version_id):
-    """
-    Access the payload for the given secret version if one exists. The version
-    can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
-    """
-
-    # Import the Secret Manager client library.
-    from google.cloud import secretmanager
-
-    # Create the Secret Manager client.
-    client = secretmanager.SecretManagerServiceClient()
-
-    # Build the resource name of the secret version.
-    name = f"projects/536053624715/secrets/sa-tzar-key-cloud-build/versions/1"
-
-    # Access the secret version.
-    response = client.access_secret_version(request={"name": name})
-
-    # Print the secret payload.
-    #
-    # WARNING: Do not print the secret in a production environment - this
-    # snippet is showing how to access the secret material.
-    payload = response.payload.data.decode("UTF-8")
-    return payload
+def _sigmoid(z):
+    """A helper sigmoid function used by the training and the scoring nodes."""
+    return 1 / (1 + np.exp(-z))
 
 
 def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
@@ -109,34 +76,9 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     target = np.argmax(test_y.to_numpy(), axis=1)
     # Calculate accuracy of predictions
     accuracy = np.sum(predictions == target) / target.shape[0]
-    curr_date_time_stamp = str(datetime.now())
-    with open(f"accuracy{curr_date_time_stamp}.txt", "w") as file:
-        file.write(f"Iris model accuracy is {str(accuracy)}")
-
-    print('-' * 100)
-    print(f'{os.system("ls -l src/ml_workflow_pipeline/pipelines/data_science/")}')
-    key_data = access_secret_version(
-        project_id='tzar-project',
-        secret_id='sa-tzar-key-cloud-build',
-        version_id=1
-    )
-    print(f'{os.system("ls -l src/ml_workflow_pipeline/pipelines/data_science/")}')
-    print('-' * 100)
-
-    with open('sa-key.json', 'w') as file:
-        file.write(key_data)
-
-    store_file_to_gcs(
-        key_path='sa-key.json',
-        bucket_name='tzar_bkt',
-        local_file_name=f'accuracy{curr_date_time_stamp}.txt'
-    )
+    # kedro data catalog method to save text file to gcs
+    TextDataSet("gcs://tzar_bkt/accuracy.txt").save(str(accuracy))
 
     # Log the accuracy of the model
     log = logging.getLogger(__name__)
     log.info("Model accuracy on test set: %0.2f%%", accuracy * 100)
-
-
-def _sigmoid(z):
-    """A helper sigmoid function used by the training and the scoring nodes."""
-    return 1 / (1 + np.exp(-z))
