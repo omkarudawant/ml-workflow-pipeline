@@ -2,9 +2,9 @@
 
 ## Overview
 
-This is a Kedro project, which was generated using `Kedro 0.17.7`.
+This is a [Kedro](https://kedro.readthedocs.io) project, which was generated using `Kedro 0.17.7`.
 
-Take a look at the [Kedro documentation](https://kedro.readthedocs.io) to get started.
+This project consists of [stanford-open-policing-project](https://www.kaggle.com/datasets/faressayah/stanford-open-policing-project) in which a classification model has been built to predict whether a person is going to be arrested after being stopped for enquiry.
 
 ## Rules and guidelines
 
